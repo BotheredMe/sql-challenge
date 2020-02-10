@@ -1,0 +1,270 @@
+-- Create tables for imports
+departments
+dept_emp
+dept_manager
+employees
+salaries
+titles
+--
+
+CREATE TABLE employees (
+	emp_no INT,
+	birth_date DATE,
+	first_name VARCHAR(30),
+	last_name VARCHAR(30),
+	gender VARCHAR(30),
+	hire_date DATE
+);
+
+CREATE TABLE dept_manager (
+	dept_no VARCHAR(30),
+	emp_no INT,
+	from_date DATE,
+	to_date DATE
+);
+
+CREATE TABLE dept_emp (
+	emp_no INT,
+	dept_no VARCHAR(30),
+	from_date DATE,
+	to_date DATE
+);
+
+CREATE TABLE departments (
+	dept_no VARCHAR(30),
+	dept_name VARCHAR(30)
+);
+
+CREATE TABLE titles (
+	emp_no INT,
+	title VARCHAR(30),
+	from_date DATE,
+	to_date DATE
+);
+
+CREATE TABLE salaries (
+	emp_no INT,
+	salary INT,
+	from_date DATE,
+	to_date DATE
+);
+
+
+--Import csv files into respective tables
+
+--Check your imports
+
+SELECT *
+FROM departments;
+
+SELECT *
+FROM dept_emp;
+
+SELECT *
+FROM dept_manager;
+
+SELECT *
+FROM employees;
+
+SELECT *
+FROM salaries;
+
+SELECT *
+FROM titles;
+
+
+-- All combined data
+
+SELECT
+emp.emp_no
+,emp.first_name
+,emp.last_name
+,emp.birth_date
+,emp.gender
+,emp.hire_date
+,sal.from_date
+,sal.to_date
+,dpt.dept_no
+,dpt.dept_name
+,ttl.title
+,sal.salary
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+	
+ORDER BY emp.emp_no
+
+
+
+--1. List the following details of each employee: employee number, last name, first name, gender, and salary.
+
+SELECT
+emp.emp_no
+,emp.last_name
+,emp.first_name
+,emp.gender
+,sal.salary
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+	
+ORDER BY emp.emp_no
+
+
+
+--2. List employees who were hired in 1986.
+
+SELECT
+emp.emp_no
+,emp.last_name
+,emp.first_name
+,emp.hire_date
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+
+WHERE
+	extract(year from emp.hire_date) = 1986 
+ORDER BY emp.emp_no
+
+
+
+
+--3. List the manager of each department with the following information: department number, department name, the manager's employee number, last name, first name, and start and end employment dates.
+
+SELECT
+	emp.emp_no
+	,emp.first_name
+	,emp.last_name
+	,sal.from_date
+	,sal.to_date
+	,dpt.dept_no
+	,dpt.dept_name
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+	
+ORDER BY emp.emp_no
+
+
+
+
+--4. List the department of each employee with the following information: employee number, last name, first name, and department name.
+
+SELECT
+emp.emp_no
+,emp.first_name
+,emp.last_name
+,dpt.dept_name
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+	
+ORDER BY emp.emp_no
+
+
+--5. List all employees whose first name is "Hercules" and last names begin with "B."
+
+SELECT
+emp.emp_no
+,emp.first_name
+,emp.last_name
+,emp.birth_date
+,emp.gender
+,emp.hire_date
+,sal.from_date
+,sal.to_date
+,dpt.dept_no
+,dpt.dept_name
+,ttl.title
+,sal.salary
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+WHERE emp.first_name = 'Hercules'
+	AND emp.last_name LIKE 'B%'
+ORDER BY emp.emp_no
+
+
+
+--6. List all employees in the Sales department, including their employee number, last name, first name, and department name.
+
+SELECT
+emp.emp_no
+,emp.first_name
+,emp.last_name
+,dpt.dept_name
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+WHERE dpt.dept_name LIKE '%Sales%'
+ORDER BY emp.emp_no
+
+
+
+--7. List all employees in the Sales and Development departments, including their employee number, last name, first name, and department name.
+
+SELECT
+emp.emp_no
+,emp.first_name
+,emp.last_name
+,dpt.dept_name
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+WHERE dpt.dept_name LIKE '%Sales%'
+	OR dpt.dept_name LIKE '%Development%'
+ORDER BY emp.emp_no
+
+
+
+--8. In descending order, list the frequency count of employee last names, i.e., how many employees share each last name.
+
+SELECT 
+emp.last_name
+,COUNT(emp.last_name) AS "frequency"
+
+FROM public.employees AS emp
+	LEFT JOIN public.dept_manager AS dmn ON dmn.emp_no = emp.emp_no
+	LEFT JOIN public.dept_emp AS dem ON dem.emp_no = emp.emp_no
+	LEFT JOIN public.departments AS dpt ON (dpt.dept_no = dmn.dept_no OR dpt.dept_no = dem.dept_no)
+	LEFT JOIN public.titles AS ttl ON ttl.emp_no = emp.emp_no
+	LEFT JOIN public.salaries AS sal ON sal.emp_no = emp.emp_no
+
+GROUP BY emp.last_name
+ORDER BY
+COUNT(emp.last_name) DESC
+
+S
